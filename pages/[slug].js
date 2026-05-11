@@ -95,6 +95,7 @@ export default function ProductPage({ products, keyword }) {
                 {keyword.category === 'tech' && '🎧'}
                 {keyword.category === 'office' && '🖊️'}
                 {keyword.category === 'fitness' && '🧘'}
+                {keyword.category === 'search' && '🔍'}
               </div>
 
               <div style={{ display: 'grid', gap: '20px' }}>
@@ -219,16 +220,24 @@ export default function ProductPage({ products, keyword }) {
   );
 }
 
-export async function getStaticPaths() {
-  const paths = keywords.map(kw => ({ params: { slug: kw.slug } }));
-  return { paths, fallback: 'blocking' };
-}
-
-export async function getStaticProps({ params }) {
-  const keyword = keywords.find(kw => kw.slug === params.slug);
+export async function getServerSideProps({ params, query }) {
+  // First, check if it's a predefined keyword
+  let keyword = keywords.find(kw => kw.slug === params.slug);
+  
+  // If not found, create a dynamic keyword from the search query
   if (!keyword) {
-    return { notFound: true };
+    const searchQuery = query?.q || params.slug.replace(/-/g, ' ');
+    keyword = {
+      slug: params.slug,
+      query: searchQuery,
+      title: searchQuery.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' '),
+      description: `AI-curated recommendations for ${searchQuery}`,
+      category: 'search'
+    };
   }
+  
   const products = await generateProducts(keyword.query);
-  return { props: { products, keyword } };
+  return { 
+    props: { products, keyword }
+  };
 }
