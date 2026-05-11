@@ -15,6 +15,15 @@ export default function Home() {
   const handleSearch = (e) => {
     e.preventDefault();
     if (!searchQuery.trim()) return;
+    
+    // Track search event
+    if (typeof window !== 'undefined' && window.gtag) {
+      window.gtag('event', 'search', {
+        search_term: searchQuery,
+        event_category: 'engagement'
+      });
+    }
+    
     const slug = searchQuery.toLowerCase().replace(/[^a-z0-9]+/g, '-');
     window.location.href = `/${slug}?q=${encodeURIComponent(searchQuery)}`;
   };

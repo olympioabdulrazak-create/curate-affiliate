@@ -1,6 +1,18 @@
 import { generateProducts } from '../lib/generateProducts';
 import { keywords } from '../lib/keywords';
 
+// Track Amazon link clicks
+const trackAmazonClick = (productName, category) => {
+  if (typeof window !== 'undefined' && window.gtag) {
+    window.gtag('event', 'amazon_click', {
+      product_name: productName,
+      category: category,
+      event_category: 'affiliate',
+      event_label: productName
+    });
+  }
+};
+
 export default function ProductPage({ products, keyword }) {
   return (
     <div style={{
@@ -181,6 +193,7 @@ export default function ProductPage({ products, keyword }) {
                     href={`https://www.amazon.com/s?k=${encodeURIComponent(product.name + ' ' + product.brand)}&tag=curate0f8-20`}
                     target="_blank"
                     rel="noopener noreferrer"
+                    onClick={() => trackAmazonClick(product.name, keyword.category)}
                     style={{
                       background: 'linear-gradient(135deg, #FF9900 0%, #FF6B00 100%)',
                       color: 'white',
